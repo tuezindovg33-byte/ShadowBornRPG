@@ -166,6 +166,7 @@ function doPost(e) {
       case 'salvarProgresso': resultado = salvarProgresso(data); break;
 
       case 'listarUsuarios': resultado = listarUsuarios(data); break;
+      case 'ranking': resultado = obterRanking(data); break;
 
       case 'concederMoedas': resultado = concederMoedas(data); break;
 
@@ -971,6 +972,15 @@ function salvarProgresso(data) {
 
 
 
+// ================= RANKING GLOBAL =================
+function obterRanking(data) {
+  try {
+    const sheet=getSheet(), col=colunas(), values=sheet.getDataRange().getValues(), jogadores=[];
+    for(let i=1;i<values.length;i++){const row=values[i];if(!row||!row[col.ID])continue;const dados=parseJSONSeguro(row[col.DadosJogo]||'{}');jogadores.push({nome:String(row[col.Nome]||'Caçador'),level:Math.max(1,Number(dados.level||1)||1),moedas:Math.max(0,Number(row[col.Moedas]||0)||0),money:Math.max(0,Number(dados.money||0)||0)});}
+    function top(k){return jogadores.slice().sort((a,b)=>Number(b[k]||0)-Number(a[k]||0)).slice(0,100);}
+    return {sucesso:true,mensagem:'Ranking atualizado',dados:{level:top('level'),coins:top('moedas'),money:top('money')}};
+  } catch(err){return {sucesso:false,mensagem:'Erro no ranking: '+err.message};}
+}
 // ================= ADMIN =================
 
 

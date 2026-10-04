@@ -328,6 +328,8 @@ class Enemy extends Sprite {
             const base = this.isBoss ? 60 : 8
             const coinReward = base + Math.floor(Math.random() * 6)
             if (typeof awardCoins === "function") awardCoins(coinReward)
+            if (window.ShadowV9 && typeof window.ShadowV9.rollDrops === "function") window.ShadowV9.rollDrops(this.type)
+            if (window.ShadowRPG && typeof window.ShadowRPG.onEnemyDefeated === "function") window.ShadowRPG.onEnemyDefeated(this)
         }
     }
 

@@ -26,3 +26,7 @@ Antes de publicar em produção, o backend deve validar sessões/tokens no servi
 - `Usuarios`: contas e progresso.
 
 Substitua o código da implantação do Google Apps Script pelo arquivo `Code.gs` deste pacote e crie uma **nova implantação** do Web App. Se a URL `/exec` mudar, atualize `APPS_SCRIPT_URL` em `js/account.js`.
+
+
+## UI V6
+Novo hub visual estilo moderno animado azul/preto, responsivo, mantendo os sistemas e persistência da v5.

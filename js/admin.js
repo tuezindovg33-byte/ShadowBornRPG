@@ -85,7 +85,7 @@ const BUILTIN_PHASES = [
 ]
 
 function defaultAdminSave() {
-    return { phases: [], npcTypes: [] }
+    return { phases: [], npcTypes: [], bossTypes: [] }
 }
 
 // Conteúdo criado pelos admins, buscado da planilha (compartilhado com
@@ -119,19 +119,26 @@ async function refreshNpcsFromServer() {
         adminData.npcTypes = res.dados.map(normalizeNpcFromServer)
     }
 }
+async function refreshBossesFromServer() {
+    if (typeof apiCall !== "function") return
+    const res = await apiCall("listarBosses", {})
+    if (res.sucesso && Array.isArray(res.dados)) {
+        adminData.bossTypes = res.dados.map(normalizeNpcFromServer).map(x => Object.assign(x,{isBoss:true}))
+    }
+}
 
 // Chamado no carregamento do jogo (antes de mostrar o menu) e sempre que
 // a Loja/Admin/Seleção de Fase precisar do conteúdo mais atual.
 async function refreshAdminContentFromServer() {
     try {
-        await Promise.all([refreshPhasesFromServer(), refreshNpcsFromServer()])
+        await Promise.all([refreshPhasesFromServer(), refreshNpcsFromServer(), refreshBossesFromServer()])
     } catch (e) {
         console.error("Não foi possível buscar fases/NPCs do servidor:", e)
     }
 }
 
 function getAllNpcTypes() {
-    return BUILTIN_NPC_TYPES.concat(adminData.npcTypes)
+    return BUILTIN_NPC_TYPES.concat(adminData.npcTypes, adminData.bossTypes || [])
 }
 
 function getNpcTypeById(id) {
@@ -328,6 +335,13 @@ function renderAdminNpcList() {
     })
 }
 
+function parseAdminDrops(text) {
+    return String(text || "").split(/\n+/).map(line => line.trim()).filter(Boolean).map(line => {
+        const p=line.split(",").map(x=>x.trim());
+        return { itemId:p[0], chance:Math.max(0,Math.min(100,Number(p[1])||0)), min:Math.max(1,Number(p[2])||1), max:Math.max(1,Number(p[3])||Number(p[2])||1) };
+    }).filter(x=>x.itemId);
+}
+
 async function saveNewNpc() {
     if (!currentUser || currentUser.role !== "admin") {
         alert("Você precisa estar logado como admin pra salvar um NPC.")
@@ -352,7 +366,8 @@ async function saveNewNpc() {
         damage: Number(document.getElementById("admin-npc-damage").value) || 8,
         speed: Number(document.getElementById("admin-npc-speed").value) || 0.6,
         scale: Number(document.getElementById("admin-npc-scale").value) || 1.8,
-        pixels: pixelGrid.map(row => row.slice())
+        pixels: pixelGrid.map(row => row.slice()),
+        drops: parseAdminDrops(document.getElementById("admin-npc-drops")?.value || "")
     }
 
     const saveBtn = document.getElementById("admin-save-npc")
@@ -373,6 +388,7 @@ async function saveNewNpc() {
 
     document.getElementById("admin-npc-name").value = ""
     document.getElementById("admin-npc-isboss").checked = false
+    if (document.getElementById("admin-npc-drops")) document.getElementById("admin-npc-drops").value = ""
     resetPixelEditor()
 
     await refreshNpcsFromServer()
@@ -547,3 +563,8 @@ function refreshAdminSelects() {
     renderNpcTypeOptions(document.getElementById("admin-spawn-type"), false)
     renderNpcTypeOptions(document.getElementById("admin-phase-boss-type"), true)
 }
+
+// API pública para módulos de interface
+window.refreshAdminContentFromServer = refreshAdminContentFromServer;
+window.getAllNpcTypes = getAllNpcTypes;
+window.getNpcTypeById = getNpcTypeById;

@@ -143,6 +143,9 @@ function hideAllScreens() {
     loginScreen.classList.add('hidden');
     registerScreen.classList.add('hidden');
     profileScreen.classList.add('hidden');
+    document.getElementById('character-screen')?.classList.add('hidden');
+    document.getElementById('quests-screen')?.classList.add('hidden');
+    ['skills-screen','npcs-screen','bosses-screen','ranking-screen','system-screen','inventory-screen','loading-screen'].forEach(id => document.getElementById(id)?.classList.add('hidden'));
     hud.classList.add('hidden');
 }
 
@@ -265,8 +268,21 @@ function backFromOverlay() {
     }
 }
 
-function beginPhase(phaseId) {
+async function beginPhase(phaseId) {
     currentPhase = getPhaseById(phaseId) || getAllPhases()[0];
+    gameState = "loading";
+    hideAllScreens();
+    const loading = document.getElementById("loading-screen");
+    const fill = document.getElementById("v9-loadfill");
+    const pct = document.getElementById("v9-loadpct");
+    const text = document.getElementById("v9-loading-text");
+    loading?.classList.remove("hidden");
+    const steps = [[15,"Carregando fase..."],[38,"Invocando inimigos..."],[62,"Preparando cenário..."],[84,"Sincronizando inventário..."],[100,"Entrando nas sombras..."]];
+    for (const [n,msg] of steps) {
+        if(fill) fill.style.width=n+"%"; if(pct) pct.textContent=n+"%"; if(text) text.textContent=msg;
+        await new Promise(r=>setTimeout(r,120));
+    }
+    loading?.classList.add("hidden");
     startGame();
 }
 
