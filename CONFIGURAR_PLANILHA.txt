@@ -1,0 +1,14 @@
+SHADOWBORN RPG - CONFIGURAÇÃO OBRIGATÓRIA DA PLANILHA
+
+1. Abra a planilha Google Sheets que será o banco do jogo.
+2. Copie o ID da URL: docs.google.com/spreadsheets/d/ESTE_E_O_ID/edit
+3. No Apps Script, substitua o Code.gs pelo Code.gs desta pasta.
+4. Se o Apps Script estiver VINCULADO à própria planilha, execute manualmente uma vez: configurarPlanilhaAtual()
+   Se for um projeto Apps Script INDEPENDENTE, execute: configurarPlanilhaPorId("COLE_O_ID_AQUI")
+5. Autorize as permissões solicitadas.
+6. Execute diagnosticoPlanilha(). Deve criar a aba _DiagnosticoShadowBorn.
+7. Vá em Implantar > Gerenciar implantações > Editar. Escolha NOVA VERSÃO e implante.
+8. Confirme que a URL terminada em /exec é a mesma de js/account.js. Se mudou, atualize APPS_SCRIPT_URL.
+9. Entre no jogo novamente como Admin e crie um NPC/Fase.
+
+Abas criadas automaticamente: Usuarios, Fases, NpcTypes, Bosses.

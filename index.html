@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0c0b14">
+    <title>ShadowBorn RPG — Ascensão das Sombras</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="./js/admin.js" defer></script>
+    <script src="./js/shop.js" defer></script>
+    <script src="./js/rpg.js" defer></script>
+    <script src="./js/account.js" defer></script>
+    <script src="./js/game.js" defer></script>
+    <script src="./js/sprites.js"></script>
+    <script src="./js/controls.js"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="game-wrapper">
+            <canvas></canvas>
+
+            <!-- HUD dentro da partida -->
+            <div id="hud" class="hidden">
+                <div class="hud-top">
+                    <div id="hp-bar-wrap">
+                        <span class="hud-icon">❤</span>
+                        <div id="hp-bar-bg"><div id="hp-bar-fill"></div></div>
+                    </div>
+                    <div class="hud-pills">
+                        <div class="hud-pill" id="coin-counter"><span class="hud-icon">🪙</span><span id="coin-count" class="wallet-coins">0</span></div>
+                        <div class="hud-pill" id="kill-counter"><span class="hud-icon">💀</span><span id="kill-count">0</span></div>
+                    </div>
+                </div>
+                <button id="hud-pause-btn" aria-label="Pausar">⏸</button>
+            </div>
+
+            <!-- ===== TELA DE TÍTULO ===== -->
+            <div id="title-screen" class="screen">
+                <div class="title-backdrop"></div>
+                <div class="title-content">
+                    <p class="eyebrow">A escuridão escolheu um novo portador</p>
+                    <h1 class="game-title"><span>SHADOW</span>BORN</h1>
+                    <p class="title-subtitle">ASCENSÃO DAS SOMBRAS</p>
+                    <p id="loading-text" class="loading-text">Carregando o mundo...</p>
+
+                    <div id="title-buttons" class="hidden">
+                        <button id="start-btn" class="btn btn-primary">▶ Iniciar Jogo</button>
+                        <button id="phases-btn-menu" class="btn btn-secondary">🗺️ Fases</button>
+                        <button id="shop-btn-menu" class="btn btn-secondary">⚒ Arsenal</button>
+                        <button id="character-btn-menu" class="btn btn-secondary">◆ Personagem</button>
+                        <button id="quests-btn-menu" class="btn btn-secondary">☾ Missões</button>
+                        <button id="how-to-btn" class="btn btn-ghost">❔ Como Jogar</button>
+                        <button id="account-btn-menu" class="btn btn-ghost">👤 Entrar / Cadastrar</button>
+                        <button id="admin-btn-menu" class="btn btn-ghost admin-entry-btn hidden">🛠️ Admin</button>
+                    </div>
+
+                    <div class="title-wallet" id="title-wallet">
+                        <span class="hud-icon">🪙</span> <span id="title-coin-count" class="wallet-coins">0</span> moedas
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== COMO JOGAR ===== -->
+            <div id="howto-screen" class="screen hidden">
+                <div class="panel">
+                    <h2>Como Jogar</h2>
+                    <div class="howto-grid">
+                        <div class="howto-row"><span class="key">A / D</span><span>Mover</span></div>
+                        <div class="howto-row"><span class="key">W</span><span>Pular</span></div>
+                        <div class="howto-row"><span class="key">Espaço</span><span>Atacar (corte de katana)</span></div>
+                        <div class="howto-row"><span class="key">Esc</span><span>Pausar</span></div>
+                    </div>
+                    <p class="howto-note">No celular, use os botões que aparecem na tela. Derrote inimigos para ganhar moedas e gastar na Loja!</p>
+                    <button id="howto-back-btn" class="btn btn-secondary">Voltar</button>
+                </div>
+            </div>
+
+            <!-- ===== LOJA ===== -->
+            <div id="shop-screen" class="screen hidden">
+                <div class="panel panel-shop">
+                    <div class="shop-header">
+                        <h2>🏪 Loja</h2>
+                        <div class="shop-wallet"><span class="hud-icon">🪙</span> <span id="shop-coin-count" class="wallet-coins">0</span></div>
+                    </div>
+                    <div id="shop-list" class="shop-list"></div>
+                    <button id="shop-back-btn" class="btn btn-secondary">Voltar</button>
+                </div>
+            </div>
+
+            <!-- ===== PERSONAGEM / PROGRESSÃO ===== -->
+            <div id="character-screen" class="screen hidden">
+                <div class="panel panel-rpg">
+                    <div class="rpg-heading"><div><span class="rpg-kicker">PORTADOR DA SOMBRA</span><h2>Personagem</h2></div><div class="level-sigil"><small>NÍVEL</small><b id="rpg-level">1</b></div></div>
+                    <div class="xp-track"><div id="rpg-xp-fill"></div></div><p id="rpg-xp-text" class="muted">0 / 100 XP</p>
+                    <div id="rpg-stats" class="rpg-stat-grid"></div>
+                    <div class="rpg-points"><span>Pontos de atributo</span><strong id="rpg-points">0</strong></div>
+                    <button id="character-back-btn" class="btn btn-secondary">Voltar</button>
+                </div>
+            </div>
+
+            <!-- ===== MISSÕES ===== -->
+            <div id="quests-screen" class="screen hidden">
+                <div class="panel panel-rpg">
+                    <div class="rpg-heading"><div><span class="rpg-kicker">CONTRATOS DA NOITE</span><h2>Missões</h2></div></div>
+                    <div id="quest-list" class="quest-list"></div>
+                    <button id="quests-back-btn" class="btn btn-secondary">Voltar</button>
+                </div>
+            </div>
+
+            <!-- ===== PAUSA ===== -->
+            <div id="pause-screen" class="screen hidden">
+                <div class="panel">
+                    <h2>Pausado</h2>
+                    <button id="resume-btn" class="btn btn-primary">Continuar</button>
+                    <button id="restart-btn" class="btn btn-secondary">Reiniciar</button>
+                    <button id="shop-btn-pause" class="btn btn-secondary">🏪 Loja</button>
+                    <button id="menu-btn" class="btn btn-ghost">Menu Principal</button>
+                </div>
+            </div>
+
+            <!-- ===== GAME OVER ===== -->
+            <div id="gameover-screen" class="screen hidden">
+                <div class="panel">
+                    <h2 class="gameover-title">Você morreu</h2>
+                    <p id="gameover-stats"></p>
+                    <button id="retry-btn" class="btn btn-primary">Tentar Novamente</button>
+                    <button id="shop-btn-gameover" class="btn btn-secondary">🏪 Loja</button>
+                    <button id="gameover-menu-btn" class="btn btn-ghost">Menu Principal</button>
+                </div>
+            </div>
+
+            <!-- ===== LOGIN ===== -->
+            <div id="login-screen" class="screen hidden">
+                <div class="panel">
+                    <h2>Entrar</h2>
+                    <input id="login-email" class="admin-input" type="email" placeholder="Email" autocomplete="username" />
+                    <input id="login-password" class="admin-input" type="password" placeholder="Senha" autocomplete="current-password" />
+                    <p id="login-error" class="form-error"></p>
+                    <button id="login-submit-btn" class="btn btn-primary">Entrar</button>
+                    <button id="go-to-register-btn" class="btn btn-ghost">Não tenho conta — Cadastrar</button>
+                    <button id="login-back-btn" class="btn btn-ghost">Voltar</button>
+                </div>
+            </div>
+
+            <!-- ===== CADASTRO ===== -->
+            <div id="register-screen" class="screen hidden">
+                <div class="panel">
+                    <h2>Criar Conta</h2>
+                    <input id="register-name" class="admin-input" type="text" placeholder="Seu nome" autocomplete="name" />
+                    <input id="register-email" class="admin-input" type="email" placeholder="Email" autocomplete="username" />
+                    <input id="register-password" class="admin-input" type="password" placeholder="Senha (mín. 4 caracteres)" autocomplete="new-password" />
+                    <p id="register-error" class="form-error"></p>
+                    <button id="register-submit-btn" class="btn btn-primary">Criar Conta</button>
+                    <button id="go-to-login-btn" class="btn btn-ghost">Já tenho conta — Entrar</button>
+                    <button id="register-back-btn" class="btn btn-ghost">Voltar</button>
+                </div>
+            </div>
+
+            <!-- ===== PERFIL ===== -->
+            <div id="profile-screen" class="screen hidden">
+                <div class="panel">
+                    <div id="profile-content"></div>
+                    <button id="profile-back-btn" class="btn btn-secondary">Voltar</button>
+                    <button id="logout-btn" class="btn btn-ghost">Sair da conta</button>
+                </div>
+            </div>
+
+            <!-- ===== SELEÇÃO DE FASE ===== -->
+            <div id="phase-select-screen" class="screen hidden">
+                <div class="panel panel-shop">
+                    <h2>🗺️ Escolha a Fase</h2>
+                    <div id="phase-select-list" class="shop-list"></div>
+                    <button id="phase-select-back-btn" class="btn btn-secondary">Voltar</button>
+                </div>
+            </div>
+
+            <!-- ===== FASE CONCLUÍDA ===== -->
+            <div id="phasecomplete-screen" class="screen hidden">
+                <div class="panel">
+                    <h2 class="phasecomplete-title">🏆 Fase Concluída!</h2>
+                    <p id="phasecomplete-stats"></p>
+                    <button id="next-phase-btn" class="btn btn-primary hidden">▶ Próxima Fase</button>
+                    <button id="phasecomplete-phases-btn" class="btn btn-secondary">🗺️ Fases</button>
+                    <button id="phasecomplete-menu-btn" class="btn btn-ghost">Menu Principal</button>
+                </div>
+            </div>
+
+            <!-- ===== PAINEL DE ADMIN ===== -->
+            <div id="admin-screen" class="screen hidden">
+                <div class="panel panel-admin">
+                    <h2>🛠️ Painel de Admin</h2>
+
+                    <div class="admin-tabs">
+                        <button id="admin-tab-phases" class="admin-tab active">🗺️ Fases</button>
+                        <button id="admin-tab-npcs" class="admin-tab">👹 NPCs</button>
+                        <button id="admin-tab-users" class="admin-tab">👤 Usuários</button>
+                    </div>
+
+                    <!-- ---- ABA FASES ---- -->
+                    <div id="admin-phases-tab" class="admin-tab-content">
+                        <div id="admin-phase-list" class="admin-list"></div>
+
+                        <h3>Nova Fase</h3>
+                        <input id="admin-phase-name" class="admin-input" placeholder="Nome da fase" />
+
+                        <div class="admin-row">
+                            <label><input type="radio" name="bgType" value="image" checked> Imagem de fundo</label>
+                            <label><input type="radio" name="bgType" value="gradient"> Cor / Gradiente</label>
+                        </div>
+
+                        <input id="admin-phase-bg-url" class="admin-input" type="url" placeholder="URL da imagem de fundo (ex: https://i.imgur.com/exemplo.png)" />
+                        <div id="admin-phase-gradient-controls" class="admin-row hidden">
+                            <label>Céu <input id="admin-phase-color-top" type="color" value="#4a3b63" /></label>
+                            <label>Chão <input id="admin-phase-color-bottom" type="color" value="#1a1424" /></label>
+                        </div>
+
+                        <label class="admin-input-label">Tamanho do mapa (telas)
+                            <input id="admin-phase-width" class="admin-input" type="number" min="2" max="12" value="6" />
+                        </label>
+
+                        <h4>Inimigos na fase</h4>
+                        <div id="admin-phase-spawns"></div>
+                        <div class="admin-row">
+                            <select id="admin-spawn-type" class="admin-input"></select>
+                            <button id="admin-add-spawn" class="btn btn-secondary">+ Adicionar</button>
+                        </div>
+
+                        <label class="admin-input-label admin-row">
+                            <input type="checkbox" id="admin-phase-has-boss" /> Tem chefão no final da fase
+                        </label>
+                        <select id="admin-phase-boss-type" class="admin-input hidden"></select>
+
+                        <button id="admin-save-phase" class="btn btn-primary">💾 Salvar Fase</button>
+                    </div>
+
+                    <!-- ---- ABA NPCS ---- -->
+                    <div id="admin-npcs-tab" class="admin-tab-content hidden">
+                        <div id="admin-npc-list" class="admin-list"></div>
+
+                        <h3>Novo NPC</h3>
+                        <input id="admin-npc-name" class="admin-input" placeholder="Nome do NPC" />
+                        <label class="admin-input-label admin-row">
+                            <input type="checkbox" id="admin-npc-isboss" /> É um chefão (boss)
+                        </label>
+
+                        <div class="admin-row admin-stats-row">
+                            <label>❤ Vida <input id="admin-npc-health" class="admin-input admin-input-sm" type="number" value="30" /></label>
+                            <label>⚔ Dano <input id="admin-npc-damage" class="admin-input admin-input-sm" type="number" value="8" /></label>
+                            <label>👟 Vel. <input id="admin-npc-speed" class="admin-input admin-input-sm" type="number" step="0.1" value="0.6" /></label>
+                            <label>📐 Escala <input id="admin-npc-scale" class="admin-input admin-input-sm" type="number" step="0.1" value="1.8" /></label>
+                        </div>
+
+                        <p class="admin-pixel-label">Desenhe o NPC (pixel art):</p>
+                        <div id="pixel-palette"></div>
+                        <div id="pixel-grid"></div>
+                        <button id="pixel-clear" class="btn btn-ghost">🧹 Limpar Desenho</button>
+
+                        <button id="admin-save-npc" class="btn btn-primary">💾 Salvar NPC</button>
+                    </div>
+
+                    <!-- ---- ABA USUÁRIOS ---- -->
+                    <div id="admin-users-tab" class="admin-tab-content hidden">
+                        <p class="admin-empty-note">Gerencie os jogadores cadastrados: conceda moedas ou promova/rebaixe administradores.</p>
+                        <div id="admin-users-list" class="admin-list"></div>
+                        <button id="admin-refresh-users" class="btn btn-secondary">🔄 Atualizar Lista</button>
+                    </div>
+
+                    <button id="admin-back-btn" class="btn btn-secondary">Voltar</button>
+                </div>
+            </div>
+
+            <!-- ===== CONTROLES TOUCH (celular/tablet) ===== -->
+            <div id="mobile-controls">
+                <div class="touch-dpad">
+                    <button id="touch-left" class="touch-btn" aria-label="Esquerda">◀</button>
+                    <button id="touch-right" class="touch-btn" aria-label="Direita">▶</button>
+                </div>
+                <div class="touch-actions">
+                    <button id="touch-jump" class="touch-btn touch-btn-round" aria-label="Pular">⤒</button>
+                    <button id="touch-attack" class="touch-btn touch-btn-round touch-btn-attack" aria-label="Atacar">⚔</button>
+                </div>
+            </div>
+
+            <div id="rotate-hint" class="screen hidden">
+                <div class="panel">
+                    <p>📱 ↻</p>
+                    <p>Gire seu aparelho para jogar melhor</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
